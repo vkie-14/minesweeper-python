@@ -52,3 +52,19 @@ class Board:
                         if 0 <= i + dx < self.rows and 0 <= j + dy < self.cols and self.board[i + dx][j + dy].is_mine:
                             cnt += 1
                 self.board[i][j].neighbor_mine = cnt
+
+    def flood_fill(self, row, col):
+        if not (0 <= row < self.rows and 0 <= col <= self.cols):
+            return
+        cell = self.board[row][col]
+        cell.opened = True
+        if cell.opened or cell.is_mine:
+            return
+        
+        if cell.neighbor_mine == 0:
+            for dx in range(-1, 2):
+                for dy in range(-1, 2):
+                    if dx == 0 and dy == 0:
+                        continue
+                    if (0 <= row + dx < self.rows and 0 <= col + dy < self.cols):
+                        self.flood_fill(row + dx, col + dy)
