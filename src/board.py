@@ -2,7 +2,7 @@
 Quản lý board
 """
 import random
-from cell import Cell
+from src.cell import Cell
 
 class Board:
     """
@@ -53,6 +53,12 @@ class Board:
                             cnt += 1
                 self.board[i][j].neighbor_mine = cnt
 
+    """
+    Hàm loang khi mở Cell.
+    
+    Đầu vào: Board và địa chỉ ô cần mở.
+    Đầu ra: Board đã loang ra và mở tất cả ô không có mìn xung quanh ô ở đầu vào.
+    """
     def flood_fill(self, row, col):
         if not (0 <= row < self.rows and 0 <= col <= self.cols):
             return
