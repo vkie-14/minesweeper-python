@@ -1,6 +1,3 @@
-"""
-Quản lý board
-"""
 import random
 from src.cell import Cell
 
@@ -60,13 +57,13 @@ class Board:
     Đầu ra: Board đã loang ra và mở tất cả ô không có mìn xung quanh ô ở đầu vào.
     """
     def flood_fill(self, row, col):
-        if not (0 <= row < self.rows and 0 <= col <= self.cols):
+        if not (0 <= row < self.rows and 0 <= col < self.cols):
             return
         cell = self.board[row][col]
-        cell.opened = True
+        
         if cell.opened or cell.is_mine:
             return
-        
+        cell.opened = True
         if cell.neighbor_mine == 0:
             for dx in range(-1, 2):
                 for dy in range(-1, 2):

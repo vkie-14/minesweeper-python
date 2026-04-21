@@ -1,6 +1,3 @@
-"""
-Quản lý Cells
-"""
 class Cell:
     """
     Khởi tạo Cell ban đầu.
@@ -15,6 +12,7 @@ class Cell:
         self.is_mine = False
         self.opened = False
         self.flagged = False
+        self.exploded = False
         self.neighbor_mine = 0
 
     """
