@@ -5,6 +5,11 @@ class Board:
     """
     Khởi tạo ra bãi mìn ban đầu.
 
+    Tham số:
+        rows: số hàng.
+        cols: số cột.
+        mine_cnt: số mìn.
+
     Các thuộc tính:
         rows: Số hàng.
         cols: Số cột.
@@ -53,8 +58,8 @@ class Board:
     """
     Hàm loang khi mở Cell.
     
-    Đầu vào: Board và địa chỉ ô cần mở.
-    Đầu ra: Board đã loang ra và mở tất cả ô không có mìn xung quanh ô ở đầu vào.
+    Input: Board và địa chỉ ô cần mở.
+    Output: Board đã loang ra và mở tất cả ô không có mìn xung quanh ô ở đầu vào.
     """
     def flood_fill(self, row, col):
         if not (0 <= row < self.rows and 0 <= col < self.cols):

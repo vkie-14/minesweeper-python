@@ -7,13 +7,14 @@ class Cell:
         opened: Cell đã được mở chưa.
         flagged: Cell có được cắm cờ không.
         neighbor_mine: Số lượng mìn xung quanh Cell.
+        exploded: người chơi dẫm bom.
     """
     def __init__(self):
         self.is_mine = False
         self.opened = False
         self.flagged = False
-        self.exploded = False
         self.neighbor_mine = 0
+        self.exploded = False
 
     """
     Thiết lập hiển thị cho Cell.
