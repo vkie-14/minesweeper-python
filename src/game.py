@@ -2,7 +2,7 @@ import pygame
 import os
 import json
 from src.board import Board
-
+from src.solver import Solver
 WHITE = (255, 255, 255)
 GRAY = (192, 192, 192)
 DARK_GRAY = (128, 128, 128)
@@ -51,6 +51,7 @@ class Game:
         self.mines = mines 
         self.board = Board(rows, cols, mines)
 
+        # Bộ đếm cờ và thời gian.
         self.flags_placed = 0
         self.timer_started = False
         self.start_time = 0
@@ -58,6 +59,7 @@ class Game:
         self.game_over = False
         self.game_won = False 
 
+        # Những thông số cơ bản cho giao diện màn chơi chính.
         self.cell_size = INITIAL_CELL_SIZE
         self.margin = self.cell_size // 2  
         self.header_height = int(self.cell_size * 2) 
@@ -74,8 +76,9 @@ class Game:
         self.face_rect = pygame.Rect(self.face_x, self.face_y, self.face_size, self.face_size)
 
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
-        pygame.display.set_caption("Minesweeper Retro")
+        pygame.display.set_caption("Minesweeper")
 
+        # Tải các tài nguyên Assets.
         self.original_images = {}
         self.images = {}
 
@@ -102,6 +105,7 @@ class Game:
         self.current_mode = "standard"
         self.current_difficulty = "easy"
 
+        # Thiết lập font chữ, tải high scores từ file.
         pygame.font.init()
         self.title_font = pygame.font.SysFont("Impact", 48)
         self.btn_font = pygame.font.SysFont("Arial", 24, bold=True)
@@ -115,6 +119,7 @@ class Game:
         self.load_high_scores()
 
         self.ui_rects = {}
+        self.current_hint = None
 
     def load_high_scores(self):
         """
@@ -157,6 +162,7 @@ class Game:
         self.elapsed_time = 0
         self.game_over = False
         self.game_won = False # Reset lại trạng thái thắng
+        self.current_hint = None
 
     def check_win(self):
         """
@@ -175,7 +181,7 @@ class Game:
         # Nếu tổng số ô đã mở bằng tổng số ô trừ đi số mìn -> Thắng
         if opened_count == (self.rows * self.cols) - self.mines:
             self.game_won = True
-            self.flags_placed = self.mines # Tự động update bộ đếm cờ về 0
+            self.flags_placed = self.mines 
             
             # Tự động cắm cờ vào các mìn còn lại
             for i in range(self.rows):
@@ -393,6 +399,27 @@ class Game:
                         key = "Tile" + str(cell.neighbor_mine)
                         self.screen.blit(self.images.get(key), (x, y))
 
+        if self.current_hint:
+            action, targets, clues = self.current_hint
+            highlight_surf = pygame.Surface((self.cell_size, self.cell_size))
+            highlight_surf.set_alpha(100)
+
+            highlight_surf.fill((50, 100, 255)) 
+            for r, c in clues:
+                x = (c * self.cell_size) + self.board_offset_x
+                y = (r * self.cell_size) + self.board_offset_y
+                self.screen.blit(highlight_surf, (x, y))
+            
+            if action == "SAFE":
+                highlight_surf.fill((100, 255, 100)) 
+            else:
+                highlight_surf.fill((255, 50, 50))
+
+            for r, c in targets:
+                x = (c * self.cell_size) + self.board_offset_x
+                y = (r * self.cell_size) + self.board_offset_y
+                self.screen.blit(highlight_surf, (x, y))
+
         pygame.display.flip()
 
     def draw_button(self, surface, text, x, y, w, h):
@@ -535,6 +562,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
+                # Xử lý sự kiện thay đổi kích thước cửa sổ game.
                 elif event.type == pygame.VIDEORESIZE:
                     self.cell_size = min(event.w // (self.cols + 1), event.h // (self.rows + 4))
                     self.cell_size = max(10, int(self.cell_size))
@@ -554,10 +582,15 @@ class Game:
                     
                     self.scale_assets()
                     self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
-            
+
+                # Xử lý sự kiện bấm chuột.
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # Lấy địa chỉ ô trên bãi mìn dựa vào tọa độ click chuột.
+                    self.current_hint = None
                     mouse_pos = pygame.mouse.get_pos()
                     mouse_x, mouse_y = pygame.mouse.get_pos()
+
+                    # Xử lý điều hướng giao diện bên ngoài trò chơi.
                     if self.state == "MAIN_MENU":
                         if self.ui_rects.get('btn_start', pygame.Rect(0,0,0,0)).collidepoint(mouse_pos):
                             self.state = "MODE_SELECT"
@@ -610,10 +643,15 @@ class Game:
                                 
                                 if 0 <= r < self.rows and 0 <= c < self.cols:
                                     cell = self.board.board[r][c]
-                                    
+                                    # Xử lý các sự kiện nhấn bằng chuột trái.
                                     if event.button == 1:
                                         if not cell.opened:
                                             if not cell.flagged:
+                                                if not self.board.mines_placed:
+                                                    if self.current_mode == "no_guessing":
+                                                        self.board.generate_no_guess_board(r, c)
+                                                    else:
+                                                        self.board.place_mines(r, c)
                                                 if not cell.is_mine:
                                                     self.board.flood_fill(r, c) 
                                                 else:
@@ -625,6 +663,7 @@ class Game:
                                                                 self.board.board[i][j].opened = True
                                                                 
                                         else:
+                                            # Đếm số cờ xung quanh.
                                             if cell.neighbor_mine > 0:
                                                 flags_around = 0
                                                 for dr in [-1, 0, 1]:
@@ -634,7 +673,7 @@ class Game:
                                                         if 0 <= nr < self.rows and 0 <= nc < self.cols:
                                                             if self.board.board[nr][nc].flagged:
                                                                 flags_around += 1
-                                                
+                                                # Chức năng mở ô nhanh khi đã cắm đủ cờ xung quanh.
                                                 if flags_around == cell.neighbor_mine:
                                                     for dr in [-1, 0, 1]:
                                                         for dc in [-1, 0, 1]:
@@ -652,14 +691,25 @@ class Game:
                                                                                     self.board.board[i][j].opened = True
                                                                     else:
                                                                         self.board.flood_fill(nr, nc)
+                                    # Xử lý các sự kiện bấm chuột phải.
                                     elif event.button == 3:
                                         if not cell.opened:
                                             cell.flagged = not cell.flagged 
-                                            self.flags_placed += 1 if cell.flagged else -1                                   
-                
-                                            
+                                            self.flags_placed += 1 if cell.flagged else -1      
+                # Chức năng gợi ý.
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_h or event.key == pygame.K_SPACE) and self.state == "PLAYING" and not self.game_over and not self.game_won:
+                        if not self.board.mines_placed:
+                            self.board.place_mines(self.rows // 2, self.cols // 2)
+                            self.timer_started = True
+                            self.start_time = pygame.time.get_ticks()
+
+                        bot = Solver(self.board)
+                        self.current_hint = bot.get_hint()
+
+            # Kiểm tra điều kiện thắng sau mỗi sự kiện.                      
             self.check_win()
-            
+            # Vẽ lại bãi mìn sau mỗi sự kiện.
             self.draw()
             
         pygame.quit()
