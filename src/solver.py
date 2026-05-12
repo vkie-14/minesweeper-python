@@ -202,7 +202,7 @@ class Solver:
 
         for comp_cells, comp_nums in components:
             # Giới hạn số phần tử 1 cụm để ngăn bị treo O(N^2).
-            if 0 < len(comp_cells) <= 22:
+            if 0 < len(comp_cells) <= 20:
                 res = self.run_component(comp_cells, comp_nums)
                 
                 if res:
