@@ -76,7 +76,7 @@ class Game:
         self.face_rect = pygame.Rect(self.face_x, self.face_y, self.face_size, self.face_size)
 
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.RESIZABLE)
-        pygame.display.set_caption("Minesweeper")
+        pygame.display.set_caption("Minesweeper (Press 'h' or space for hint)")
 
         # Tải các tài nguyên Assets.
         self.original_images = {}

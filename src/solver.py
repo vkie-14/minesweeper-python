@@ -102,7 +102,7 @@ class Solver:
         Các luồng kiểm tra:
             1. Tìm ô hiển nhiên an toàn hoặc có mìn O(N).
             2. Tìm giao thoa tập hợp 2 ô liên kề 0(N^2).
-            3. Tách các vùng biên thành đồ thị, quay lui nhánh cận để vét cạn mọi trường hợp.
+            3. Tách các vùng biên thành đồ thị, quay lui nhánh cận để vét cạn mọi trường hợp O(2^N).
         Trả về:
             tuple hoặc None: Trả về (Action, Targets, Clues) nếu tìm thấy gợi ý.
                 - Action (str): "SAFE" (Gợi ý mở ô) hoặc "FLAG" (Gợi ý cắm cờ).
